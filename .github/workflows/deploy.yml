@@ -25,13 +25,19 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm install
+      - name: Install
+        run: npm ci
 
-      # BASE_PATH makes Vite output correct asset URLs for project pages
+      - name: Set BASE_PATH
+        run: |
+          if [[ "${{ github.repository }}" == *".github.io" ]]; then
+            echo "BASE_PATH=/" >> $GITHUB_ENV
+          else
+            echo "BASE_PATH=/${{ github.event.repository.name }}/" >> $GITHUB_ENV
+          fi
+
       - name: Build
         run: npm run build
-        env:
-          BASE_PATH: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
